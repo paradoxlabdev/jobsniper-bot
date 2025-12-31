@@ -1,6 +1,10 @@
-# JobSniper 🎯
-
-**Production-ready automated job monitoring system with AI-powered CV matching analysis.**
+<div align="center">
+  <img src="images/logo.png" alt="JobSniper Logo" width="200"/>
+  
+  # JobSniper 🎯
+  
+  **Production-ready automated job monitoring system with AI-powered CV matching analysis.**
+</div>
 
 JobSniper is an advanced, high-precision tool designed for automated job hunting across multiple job boards including **Just Join IT**, **RemoteOK**, **Remotive**, **Arbeitnow**, and **WeWorkRemotely**. Unlike traditional job alerts that only filter by basic keywords or locations, JobSniper uses **LLM-based Artificial Intelligence** (OpenAI GPT-4o-mini) to deeply understand the context of your professional background.
 
