@@ -143,12 +143,20 @@ Available metrics:
 
 ## 🎮 Telegram Control Panel
 
-Type `/menu` or `/start` in Telegram to access the interactive control panel:
+Type `/start` in Telegram to access the interactive control panel:
 
 <div align="center">
   <img src="images/menu.png" alt="Telegram Menu" width="300"/>
   <p><em>Main control panel menu</em></p>
 </div>
+
+### Available Commands
+
+- `/start` - Open control panel (main menu)
+- `/help` - Show AI explanation and feature guide
+- `/stats` - View work statistics
+- `/mycv` - View your CV settings
+- `/reset` - Force full re-analysis of all offers
 
 ### Features
 
@@ -185,7 +193,7 @@ Type `/menu` or `/start` in Telegram to access the interactive control panel:
       </td>
       <td align="center">
         <img src="images/help.png" alt="Help Menu" width="300"/>
-        <p><em>Help & Commands</em></p>
+        <p><em>Help - AI Explanation & Features</em></p>
       </td>
     </tr>
   </table>

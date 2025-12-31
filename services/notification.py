@@ -1473,11 +1473,17 @@ class NotificationService:
             "<b>⚙️ Settings & Filters:</b>\n"
             "• <b>🎯 Threshold:</b> Minimum AI score required to get a notification (e.g., 70%). Lower it to see more offers.\n"
             "• <b>🌍 Cities / 🏠 Remote:</b> Traditional location filters.\n"
-            "• <b>🔍 Keywords:</b> <i>Speed up the process!</i> These are pre-filters. If you set 'Python', I only use AI to analyze offers containing 'Python'.\n\n"
+            "• <b>🔍 Keywords:</b> <i>Speed up the process!</i> These are pre-filters. If you set 'Python', I only use AI to analyze offers containing 'Python'.\n"
+            "• <b>⚙️ Match Mode:</b> Controls how strictly keywords must match:\n"
+            "  🟢 <b>Relaxed</b> - At least 1 keyword must match\n"
+            "  🟡 <b>Moderate</b> - At least 40% of keywords must match\n"
+            "  🔴 <b>Strict</b> - At least 80% of keywords must match\n"
+            "• <b>📁 Category IDs:</b> Just Join IT category filters (e.g., 5=Python, 1=JavaScript). Only applies to Just Join IT.\n\n"
             
             "<b>💡 Pro Tip:</b>\n"
             "If you get too many weak matches, increase the <b>Threshold</b> to 80%.\n"
-            "If you get nothing, lower the <b>Threshold</b> to 40% or check your <b>Keywords</b>."
+            "If you get nothing, lower the <b>Threshold</b> to 40% or check your <b>Keywords</b>.\n"
+            "Use <b>Match Mode</b> to fine-tune keyword filtering - Relaxed for more results, Strict for precision."
         )
         keyboard = [[InlineKeyboardButton("⬅️ Back", callback_data="back_to_menu")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
