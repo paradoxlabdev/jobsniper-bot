@@ -68,6 +68,14 @@ cp .env.example .env
 mkdir -p data
 cp /path/to/your/cv.pdf data/cv.pdf
 
+# Set proper permissions for data directories
+# (Required for non-root user in container)
+mkdir -p logs data grafana_data prometheus_data
+sudo chown -R 1000:1000 logs/ data/
+sudo chown -R 472:472 grafana_data/ 2>/dev/null || sudo chown -R 65534:65534 grafana_data/
+sudo chown -R 65534:65534 prometheus_data/ 2>/dev/null || sudo chown -R nobody:nogroup prometheus_data/
+chmod -R 755 logs/ data/ grafana_data/ prometheus_data/
+
 # Start all services
 docker-compose up -d
 ```
@@ -76,6 +84,48 @@ docker-compose up -d
 
 ```bash
 curl http://localhost:8080/health
+```
+
+### Troubleshooting
+
+**Problem: Permission denied errors**
+
+If you see `PermissionError` in logs, fix directory permissions:
+
+```bash
+# Stop containers
+docker-compose down
+
+# Fix permissions
+sudo chown -R 1000:1000 logs/ data/
+sudo chown -R 472:472 grafana_data/ 2>/dev/null || sudo chown -R 65534:65534 grafana_data/
+sudo chown -R 65534:65534 prometheus_data/ 2>/dev/null || sudo chown -R nobody:nogroup prometheus_data/
+chmod -R 755 logs/ data/ grafana_data/ prometheus_data/
+
+# Restart
+docker-compose up -d
+```
+
+**Problem: Services restarting (Grafana/Prometheus)**
+
+Check logs to identify the issue:
+
+```bash
+docker-compose logs grafana | tail -50
+docker-compose logs prometheus | tail -50
+docker-compose logs app | tail -50
+```
+
+**Problem: Port already in use**
+
+If you get port conflicts, change ports in `docker-compose.yml` or stop conflicting containers:
+
+```bash
+# Find container using port
+sudo lsof -i :5433
+docker ps | grep <port>
+
+# Stop conflicting container or change port in docker-compose.yml
 ```
 
 ## 🎮 Telegram Control Panel

@@ -57,17 +57,21 @@ class StorageService:
                 # Prepare data for insert
                 insert_data = self._prepare_offer_data(offer_data)
                 
-                # PostgreSQL upsert
+                # PostgreSQL upsert - handle conflicts on jjit_id or unique identity
                 stmt = insert(JobOffer).values(**insert_data)
                 stmt = stmt.on_conflict_do_update(
-                    index_elements=["jjit_id"],
+                    constraint="idx_unique_offer_identity",  # Handle conflicts on (company_name, title, city)
                     set_={
-                        "title": stmt.excluded.title,
+                        "jjit_id": stmt.excluded.jjit_id,  # Update jjit_id if different source
+                        "slug": stmt.excluded.slug,
                         "description": stmt.excluded.description,
                         "salary_from": stmt.excluded.salary_from,
                         "salary_to": stmt.excluded.salary_to,
                         "skills": stmt.excluded.skills,
                         "workplace_type": stmt.excluded.workplace_type,
+                        "offer_url": stmt.excluded.offer_url,  # Update URL if from different source
+                        "apply_url": stmt.excluded.apply_url,
+                        "published_at": stmt.excluded.published_at,
                         "updated_at": datetime.now(timezone.utc),
                     }
                 ).returning(JobOffer)
@@ -110,16 +114,21 @@ class StorageService:
                 if not prepared_data:
                     return 0
 
-                # Single batch upsert statement
+                # Single batch upsert statement - handle both jjit_id and unique identity conflicts
                 stmt = insert(JobOffer).values(prepared_data)
                 stmt = stmt.on_conflict_do_update(
-                    index_elements=["jjit_id"],
+                    constraint="idx_unique_offer_identity",  # Handle conflicts on (company_name, title, city)
                     set_={
-                        "title": stmt.excluded.title,
+                        "jjit_id": stmt.excluded.jjit_id,  # Update jjit_id if different source
+                        "slug": stmt.excluded.slug,
                         "description": stmt.excluded.description,
                         "salary_from": stmt.excluded.salary_from,
                         "salary_to": stmt.excluded.salary_to,
                         "skills": stmt.excluded.skills,
+                        "workplace_type": stmt.excluded.workplace_type,
+                        "offer_url": stmt.excluded.offer_url,  # Update URL if from different source
+                        "apply_url": stmt.excluded.apply_url,
+                        "published_at": stmt.excluded.published_at,
                         "updated_at": datetime.now(timezone.utc),
                     }
                 )
