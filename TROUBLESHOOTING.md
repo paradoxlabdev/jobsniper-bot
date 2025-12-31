@@ -149,8 +149,6 @@ docker stats
 # Check free space
 df -h
 docker system df
-```
-
-
+``
 
 
