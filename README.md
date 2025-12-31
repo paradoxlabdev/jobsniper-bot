@@ -134,9 +134,23 @@ Available metrics:
 - `jobsniper_uptime_seconds` - Application uptime
 - `jobsniper_component_status` - Individual component status (database, redis, cv, application)
 
+#### Grafana Dashboards
+
+<div align="center">
+  <img src="images/grafana vc.png" alt="Grafana Dashboard" width="800"/>
+  <p><em>Grafana monitoring dashboard with health metrics and component status</em></p>
+</div>
+
 ## 🎮 Telegram Control Panel
 
-Type `/menu` or `/start` in Telegram to access:
+Type `/menu` or `/start` in Telegram to access the interactive control panel:
+
+<div align="center">
+  <img src="images/menu.png" alt="Telegram Menu" width="300"/>
+  <p><em>Main control panel menu</em></p>
+</div>
+
+### Features
 
 - **🚀 SEARCH NOW**: Trigger immediate scan
 - **🛑 STOP SEARCH**: Stop automatic scanning
@@ -149,6 +163,33 @@ Type `/menu` or `/start` in Telegram to access:
 - **🔍 Keywords**: Update search keywords
 - **📁 Category IDs**: Change Just Join IT category IDs
 - **⚙️ Match Mode**: Set keyword matching mode (Relaxed/Moderate/Strict)
+
+### Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="images/Statistics.png" alt="Statistics" width="300"/>
+        <p><em>Performance Statistics</em></p>
+      </td>
+      <td align="center">
+        <img src="images/Matching.png" alt="Matching" width="300"/>
+        <p><em>AI Matching Results</em></p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="images/Threshold.jpg" alt="Threshold Settings" width="300"/>
+        <p><em>Threshold Configuration</em></p>
+      </td>
+      <td align="center">
+        <img src="images/help.png" alt="Help Menu" width="300"/>
+        <p><em>Help & Commands</em></p>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## ⚙️ Configuration
 

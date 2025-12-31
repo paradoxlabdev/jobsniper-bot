@@ -156,8 +156,12 @@ class HealthServer:
             
             # Add application state if available
             if self.sniper:
+                # is_running means "search cycle in progress", but app is running if self.running is True
+                # For health check, we want to know if the app is operational, not just if it's scanning
+                app_is_operational = self.sniper.running if hasattr(self.sniper, 'running') else True
                 response_data["components"]["application"] = {
-                    "is_running": self.sniper.is_running,
+                    "is_running": app_is_operational,  # Changed: now shows if app is operational, not just scanning
+                    "is_scanning": self.sniper.is_running,  # Added: shows if search cycle is in progress
                     "next_run": self.sniper.next_run_at.isoformat() if self.sniper.next_run_at else None,
                     "error_count": self.sniper.error_count
                 }

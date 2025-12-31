@@ -1,0 +1,408 @@
+{
+  "title": "JobSniper Monitoring",
+  "tags": ["jobsniper", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+        "type": "stat",
+        "title": "Overall Health Status",
+        "targets": [
+          {
+            "expr": "jobsniper_health_status{component=\"overall\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "1": {
+                    "text": "Healthy",
+                    "color": "green"
+                  },
+                  "0.5": {
+                    "text": "Degraded",
+                    "color": "yellow"
+                  },
+                  "0": {
+                    "text": "Unhealthy",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 1, "color": "green"}
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+        "type": "gauge",
+        "title": "OpenAI Circuit Breaker",
+        "targets": [
+          {
+            "expr": "jobsniper_circuit_breaker_state{exported_service=\"openai\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 1,
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "1": {
+                    "text": "Closed",
+                    "color": "green"
+                  },
+                  "0.5": {
+                    "text": "Half-Open",
+                    "color": "yellow"
+                  },
+                  "0": {
+                    "text": "Open",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 1, "color": "green"}
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+        "type": "stat",
+        "title": "Uptime",
+        "targets": [
+          {
+            "expr": "jobsniper_uptime_seconds",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "s",
+            "custom": {
+              "displayMode": "basic"
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "type": "timeseries",
+        "title": "Response Times (95th Percentile)",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(jobsniper_response_time_ms_bucket{component=\"database\"}[5m]))",
+            "legendFormat": "Database",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(jobsniper_response_time_ms_bucket{component=\"redis\"}[5m]))",
+            "legendFormat": "Redis",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "pointSize": 5
+            },
+            "unit": "ms",
+            "min": 0
+          }
+        },
+        "options": {
+          "tooltip": {
+            "mode": "multi"
+          },
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": {"x": 12, "y": 4, "w": 6, "h": 4},
+        "type": "stat",
+        "title": "Database Status",
+        "targets": [
+          {
+            "expr": "jobsniper_component_status{component=\"database\",type=\"status\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "1": {
+                    "text": "OK",
+                    "color": "green"
+                  },
+                  "0": {
+                    "text": "ERROR",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "id": 6,
+        "gridPos": {"x": 12, "y": 8, "w": 6, "h": 4},
+        "type": "stat",
+        "title": "Redis Status",
+        "targets": [
+          {
+            "expr": "jobsniper_component_status{component=\"redis\",type=\"status\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "1": {
+                    "text": "OK",
+                    "color": "green"
+                  },
+                  "0": {
+                    "text": "ERROR",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "id": 7,
+        "gridPos": {"x": 0, "y": 12, "w": 6, "h": 4},
+        "type": "stat",
+        "title": "CV Status",
+        "targets": [
+          {
+            "expr": "jobsniper_component_status{component=\"cv\",type=\"status\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "1": {
+                    "text": "Loaded",
+                    "color": "green"
+                  },
+                  "0": {
+                    "text": "Not Loaded",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": {"x": 6, "y": 12, "w": 6, "h": 4},
+        "type": "stat",
+        "title": "Application Status",
+        "targets": [
+          {
+            "expr": "jobsniper_component_status{component=\"application\",type=\"running\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "1": {
+                    "text": "Running",
+                    "color": "green"
+                  },
+                  "0": {
+                    "text": "Stopped",
+                    "color": "red"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            },
+            "unit": "none"
+          }
+        },
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "textMode": "value"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "weekStart": ""
+}

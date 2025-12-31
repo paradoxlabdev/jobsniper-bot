@@ -120,8 +120,12 @@ def update_metrics(health_data: dict):
     
     # Application
     app = components.get("application", {})
+    # is_running now represents if app is operational (not just scanning)
     app_running = 1.0 if app.get("is_running", False) else 0.0
     component_status.labels(component="application", type="running").set(app_running)
+    # Also track if actively scanning
+    app_scanning = 1.0 if app.get("is_scanning", False) else 0.0
+    component_status.labels(component="application", type="scanning").set(app_scanning)
     
     # Circuit Breaker
     cb = components.get("openai_circuit_breaker", {})
