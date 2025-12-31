@@ -64,19 +64,15 @@ cd jobsniper-bot
 cp .env.example .env
 # Edit .env and add your API keys
 
-# Add your CV
-mkdir -p data
+# Run setup script (creates directories and sets permissions)
+chmod +x setup.sh
+./setup.sh
+
+# Add your CV (optional)
 cp /path/to/your/cv.pdf data/cv.pdf
 
-# Set proper permissions for data directories
-# (Required for non-root user in container)
-mkdir -p logs data grafana_data prometheus_data
-sudo chown -R 1000:1000 logs/ data/
-sudo chown -R 472:472 grafana_data/ 2>/dev/null || sudo chown -R 65534:65534 grafana_data/
-sudo chown -R 65534:65534 prometheus_data/ 2>/dev/null || sudo chown -R nobody:nogroup prometheus_data/
-chmod -R 755 logs/ data/ grafana_data/ prometheus_data/
-
 # Start all services
+DOCKER_BUILDKIT=1 docker-compose build
 docker-compose up -d
 ```
 
@@ -96,11 +92,8 @@ If you see `PermissionError` in logs, fix directory permissions:
 # Stop containers
 docker-compose down
 
-# Fix permissions
-sudo chown -R 1000:1000 logs/ data/
-sudo chown -R 472:472 grafana_data/ 2>/dev/null || sudo chown -R 65534:65534 grafana_data/
-sudo chown -R 65534:65534 prometheus_data/ 2>/dev/null || sudo chown -R nobody:nogroup prometheus_data/
-chmod -R 755 logs/ data/ grafana_data/ prometheus_data/
+# Run setup script to fix permissions
+./setup.sh
 
 # Restart
 docker-compose up -d
