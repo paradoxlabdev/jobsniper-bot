@@ -61,9 +61,11 @@ JobSniper/
 
 ### Prerequisites
 
-- Docker & Docker Compose
+- **Docker & Docker Compose** (required - application runs in containers)
 - OpenAI API key
 - Telegram Bot (token + chat ID)
+
+> **Note:** This project is containerized using Docker. All services (application, database, Redis, monitoring) run in Docker containers for easy deployment and isolation.
 
 ### Installation
 
@@ -85,10 +87,18 @@ JobSniper/
    cp /path/to/your/cv.pdf data/cv.pdf
    ```
 
-4. **Start the application**
+4. **Start the application with Docker**
    ```bash
    docker-compose up -d
    ```
+   
+   This will start all services in containers:
+   - Application (JobSniper bot)
+   - PostgreSQL database
+   - Redis cache
+   - Prometheus (monitoring)
+   - Grafana (dashboards)
+   - Prometheus exporter
 
 5. **Check status**
    ```bash
@@ -262,6 +272,6 @@ For issues:
 
 ---
 
-**Author:** Adam  
+**Author:** paradoxlab.dev 
 **Version:** 2.0.0  
 **Last Updated:** 2025
