@@ -3,6 +3,7 @@ Centralized logging configuration.
 """
 import logging
 import sys
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 from typing import Optional
 
@@ -43,12 +44,19 @@ def setup_logger(
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
     
-    # File handler (optional)
+    # File handler with rotation (optional)
     if log_file:
         log_path = Path("logs") / log_file
         log_path.parent.mkdir(parents=True, exist_ok=True)
         
-        file_handler = logging.FileHandler(log_path, encoding="utf-8")
+        # Use TimedRotatingFileHandler: rotate daily, keep 7 days of logs
+        file_handler = TimedRotatingFileHandler(
+            filename=str(log_path),
+            when='midnight',  # Rotate at midnight
+            interval=1,  # Every day
+            backupCount=7,  # Keep 7 days of logs
+            encoding="utf-8"
+        )
         file_handler.setLevel(log_level)
         file_formatter = logging.Formatter(
             fmt="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
