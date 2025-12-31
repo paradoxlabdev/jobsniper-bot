@@ -14,6 +14,16 @@ JobSniper scans **5 job boards** (Just Join IT, RemoteOK, Remotive, Arbeitnow, W
 
 ![JobSniper Logo](images/logo.png)
 
+## 🔄 How It Works
+
+1. **Fetch** — Scans 5 job boards every 5 minutes (configurable)
+2. **Store** — Saves all offers to PostgreSQL database
+3. **Analyze** — Uses GPT-4o-mini to compare each offer against your CV
+4. **Score** — Assigns match score (0-100%) based on skills, experience, and requirements
+5. **Notify** — Sends Telegram alert if score exceeds your threshold
+
+All settings can be changed dynamically via Telegram menu - no restart required!
+
 ## ✨ Key Features
 
 - **🧠 AI Matching** — GPT-4o-mini understands nuances in tech stacks, seniority, and domain experience
@@ -98,7 +108,36 @@ Type `/start` in Telegram to access the interactive control panel.
 | 📁 **Category IDs** | Change Just Join IT category IDs |
 | ⚙️ **Match Mode** | Set keyword matching (Relaxed/Moderate/Strict) |
 
+### Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="images/menu.png" alt="Telegram Menu" width="300"/>
+        <p><em>Interactive Control Panel</em></p>
+      </td>
+      <td align="center">
+        <img src="images/Statistics.png" alt="Statistics" width="300"/>
+        <p><em>Performance Statistics</em></p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="images/Matching.png" alt="Matching" width="300"/>
+        <p><em>AI Matching Results</em></p>
+      </td>
+      <td align="center">
+        <img src="images/Threshold.jpg" alt="Threshold" width="300"/>
+        <p><em>Threshold Configuration</em></p>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ## 📊 Monitoring
+
+### Health Checks
 
 | Endpoint | Description |
 |----------|-------------|
@@ -107,6 +146,13 @@ Type `/start` in Telegram to access the interactive control panel.
 | `http://localhost:8080/health/redis` | Redis status |
 | `http://localhost:9090` | Prometheus |
 | `http://localhost:3001` | Grafana (admin/admin) |
+
+### Grafana Dashboard
+
+<div align="center">
+  <img src="images/grafana vc.png" alt="Grafana Dashboard" width="800"/>
+  <p><em>Real-time monitoring with health metrics, response times, and circuit breaker status</em></p>
+</div>
 
 ## ⚙️ Configuration
 
