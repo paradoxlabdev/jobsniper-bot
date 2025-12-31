@@ -1,0 +1,99 @@
+# Data directories (runtime data, not needed for build)
+db_data/
+redis_data/
+grafana_data/
+prometheus_data/
+data/
+logs/
+archive/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+docs/
+*.md
+!README.md
+images/
+PROJECT_STRUCTURE.md
+DEPLOYMENT.md
+TROUBLESHOOTING.md
+
+# Test files
+tests/
+manual_tests/
+*.test.py
+test_*.py
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Scripts (not needed in container)
+scripts/
+run_tests.sh
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker files (not needed inside container)
+docker-compose.yml
+Dockerfile
+Dockerfile.exporter
+.dockerignore
+
+# Grafana provisioning (mounted as volume, not needed in build)
+grafana_provisioning/
+
+# Prometheus config (mounted as volume)
+prometheus.yml
+
+# CV files (mounted as volume)
+cv/
+
+# Other
+*.bak
+*.backup
+*.tmp
+*.log

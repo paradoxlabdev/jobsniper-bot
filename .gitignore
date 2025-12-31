@@ -95,4 +95,4 @@ data/cv.pdf
 archive/
 
 # Docker
-.dockerignore
+# .dockerignore - needed in repo for Docker builds
