@@ -57,30 +57,52 @@ class StorageService:
                 # Prepare data for insert
                 insert_data = self._prepare_offer_data(offer_data)
                 
-                # PostgreSQL upsert - handle conflicts on jjit_id or unique identity
-                stmt = insert(JobOffer).values(**insert_data)
-                stmt = stmt.on_conflict_do_update(
-                    constraint="idx_unique_offer_identity",  # Handle conflicts on (company_name, title, city)
-                    set_={
-                        "jjit_id": stmt.excluded.jjit_id,  # Update jjit_id if different source
-                        "slug": stmt.excluded.slug,
-                        "description": stmt.excluded.description,
-                        "salary_from": stmt.excluded.salary_from,
-                        "salary_to": stmt.excluded.salary_to,
-                        "skills": stmt.excluded.skills,
-                        "workplace_type": stmt.excluded.workplace_type,
-                        "offer_url": stmt.excluded.offer_url,  # Update URL if from different source
-                        "apply_url": stmt.excluded.apply_url,
-                        "published_at": stmt.excluded.published_at,
-                        "updated_at": datetime.now(timezone.utc),
-                    }
-                ).returning(JobOffer)
-                
-                result = await session.execute(stmt)
-                offer = result.scalar_one()
-                
-                logger.debug(f"Upserted offer: {offer.jjit_id} - {offer.title}")
-                return offer
+                # Try upsert by jjit_id first (most common case)
+                try:
+                    stmt = insert(JobOffer).values(**insert_data)
+                    stmt = stmt.on_conflict_do_update(
+                        index_elements=["jjit_id"],
+                        set_={
+                            "title": stmt.excluded.title,
+                            "description": stmt.excluded.description,
+                            "salary_from": stmt.excluded.salary_from,
+                            "salary_to": stmt.excluded.salary_to,
+                            "skills": stmt.excluded.skills,
+                            "workplace_type": stmt.excluded.workplace_type,
+                            "updated_at": datetime.now(timezone.utc),
+                        }
+                    ).returning(JobOffer)
+                    
+                    result = await session.execute(stmt)
+                    offer = result.scalar_one()
+                    logger.debug(f"Upserted offer by jjit_id: {offer.jjit_id} - {offer.title}")
+                    return offer
+                    
+                except IntegrityError:
+                    # If jjit_id conflict fails, try unique identity conflict
+                    # This handles cases where same offer appears from different sources with different jjit_id
+                    stmt = insert(JobOffer).values(**insert_data)
+                    stmt = stmt.on_conflict_do_update(
+                        index_elements=["company_name", "title", "city"],  # Handle conflicts on unique identity
+                        set_={
+                            "jjit_id": stmt.excluded.jjit_id,  # Update jjit_id if different source
+                            "slug": stmt.excluded.slug,
+                            "description": stmt.excluded.description,
+                            "salary_from": stmt.excluded.salary_from,
+                            "salary_to": stmt.excluded.salary_to,
+                            "skills": stmt.excluded.skills,
+                            "workplace_type": stmt.excluded.workplace_type,
+                            "offer_url": stmt.excluded.offer_url,  # Update URL if from different source
+                            "apply_url": stmt.excluded.apply_url,
+                            "published_at": stmt.excluded.published_at,
+                            "updated_at": datetime.now(timezone.utc),
+                        }
+                    ).returning(JobOffer)
+                    
+                    result = await session.execute(stmt)
+                    offer = result.scalar_one()
+                    logger.debug(f"Upserted offer by unique identity: {offer.jjit_id} - {offer.title}")
+                    return offer
                 
         except Exception as e:
             logger.error(f"Failed to upsert offer: {e}", exc_info=True)
@@ -114,10 +136,11 @@ class StorageService:
                 if not prepared_data:
                     return 0
 
-                # Single batch upsert statement - handle both jjit_id and unique identity conflicts
+                # Single batch upsert statement - handle conflicts on unique identity (company_name, title, city)
+                # This handles cases where same offer appears from different sources with different jjit_id
                 stmt = insert(JobOffer).values(prepared_data)
                 stmt = stmt.on_conflict_do_update(
-                    constraint="idx_unique_offer_identity",  # Handle conflicts on (company_name, title, city)
+                    index_elements=["company_name", "title", "city"],  # Handle conflicts on unique identity
                     set_={
                         "jjit_id": stmt.excluded.jjit_id,  # Update jjit_id if different source
                         "slug": stmt.excluded.slug,
