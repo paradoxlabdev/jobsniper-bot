@@ -7,7 +7,7 @@
 ```bash
 # Stop all JobSniper containers
 docker-compose down
-
+ 
 # Check for old containers
 docker ps -a | grep jobsniper
 
@@ -150,3 +150,7 @@ docker stats
 df -h
 docker system df
 ```
+
+
+
+
