@@ -93,7 +93,7 @@ class JobSniper:
             await notification_service.start_polling()
             
             # Start health check server
-            health_server.set_references(self, matcher_service, db_manager)
+            health_server.set_references(self, matcher_service, db_manager, storage_service)
             asyncio.create_task(health_server.start())
             
             # Test Telegram connection

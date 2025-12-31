@@ -69,6 +69,31 @@ circuit_breaker_total_failures = Gauge(
     registry=registry
 )
 
+# Statistics metrics
+total_offers = Gauge(
+    'jobsniper_total_offers',
+    'Total number of job offers in database',
+    registry=registry
+)
+
+analyzed_offers = Gauge(
+    'jobsniper_analyzed_offers',
+    'Number of offers analyzed by AI',
+    registry=registry
+)
+
+sent_notifications = Gauge(
+    'jobsniper_sent_notifications',
+    'Number of notifications sent',
+    registry=registry
+)
+
+average_match_score = Gauge(
+    'jobsniper_average_match_score',
+    'Average AI match score',
+    registry=registry
+)
+
 
 async def fetch_health_data():
     """Fetch health data from JobSniper health endpoint."""
@@ -79,6 +104,18 @@ async def fetch_health_data():
             return response.json()
     except Exception as e:
         print(f"Error fetching health data: {e}")
+        return None
+
+
+async def fetch_stats_data():
+    """Fetch statistics data from JobSniper stats endpoint."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get("http://app:8080/stats")
+            response.raise_for_status()
+            return response.json()
+    except Exception as e:
+        print(f"Error fetching stats data: {e}")
         return None
 
 
@@ -142,12 +179,28 @@ def update_metrics(health_data: dict):
     circuit_breaker_total_failures.labels(service="openai").set(stats.get("total_failures", 0))
 
 
+def update_stats_metrics(stats_data: dict):
+    """Update Prometheus metrics from stats data."""
+    if not stats_data:
+        return
+    
+    total_offers.set(stats_data.get("total_offers", 0))
+    analyzed_offers.set(stats_data.get("analyzed_offers", 0))
+    sent_notifications.set(stats_data.get("sent_notifications", 0))
+    average_match_score.set(stats_data.get("average_score", 0.0))
+
+
 async def metrics_task():
     """Background task to periodically update metrics."""
     while True:
         health_data = await fetch_health_data()
         if health_data:
             update_metrics(health_data)
+        
+        stats_data = await fetch_stats_data()
+        if stats_data:
+            update_stats_metrics(stats_data)
+        
         await asyncio.sleep(10)  # Update every 10 seconds
 
 

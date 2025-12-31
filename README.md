@@ -72,8 +72,7 @@ chmod +x setup.sh
 cp /path/to/your/cv.pdf data/cv.pdf
 
 # Start all services
-DOCKER_BUILDKIT=1 docker-compose build
-docker-compose up -d
+docker-compose build && docker-compose up -d
 ```
 
 ### Health Check

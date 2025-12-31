@@ -29,12 +29,14 @@ class HealthServer:
         self.sniper = None
         self.matcher_service = None
         self.db_manager = None
+        self.storage_service = None
     
-    def set_references(self, sniper, matcher_service, db_manager=None):
+    def set_references(self, sniper, matcher_service, db_manager=None, storage_service=None):
         """Set references to main application objects."""
         self.sniper = sniper
         self.matcher_service = matcher_service
         self.db_manager = db_manager
+        self.storage_service = storage_service
     
     async def _check_database(self) -> dict:
         """Check database connection with timeout."""
@@ -260,6 +262,31 @@ class HealthServer:
         """Liveness probe - checks if app is alive."""
         return web.json_response({"status": "alive"})
     
+    async def stats_endpoint(self, request: web.Request) -> web.Response:
+        """Statistics endpoint - returns job offer statistics."""
+        try:
+            if not self.storage_service:
+                return web.json_response(
+                    {"error": "Storage service not available"},
+                    status=503
+                )
+            
+            stats = await self.storage_service.get_statistics()
+            
+            return web.json_response({
+                "total_offers": stats.get("total_offers", 0),
+                "analyzed_offers": stats.get("analyzed_offers", 0),
+                "sent_notifications": stats.get("sent_notifications", 0),
+                "average_score": stats.get("average_score", 0.0),
+                "last_scan": stats.get("last_scan").isoformat() if stats.get("last_scan") else None
+            })
+        except Exception as e:
+            logger.error(f"Stats endpoint error: {e}", exc_info=True)
+            return web.json_response(
+                {"error": str(e)},
+                status=500
+            )
+    
     def _format_uptime(self, seconds: float) -> str:
         """Format uptime in human-readable format."""
         days = int(seconds // 86400)
@@ -290,6 +317,7 @@ class HealthServer:
             self.app.router.add_get('/health/redis', self.health_redis)
             self.app.router.add_get('/readiness', self.readiness_check)
             self.app.router.add_get('/liveness', self.liveness_check)
+            self.app.router.add_get('/stats', self.stats_endpoint)
             
             # Start server
             self.runner = web.AppRunner(self.app)
