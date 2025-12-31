@@ -9,7 +9,7 @@ services:
     volumes:
       - ./db_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5433:5432"  # Only accessible from localhost (external)
+      - "127.0.0.1:5435:5432"  # Only accessible from localhost (external)
     # Note: PostgreSQL listens on all interfaces inside container for Docker network access
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]

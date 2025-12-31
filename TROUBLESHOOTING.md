@@ -131,6 +131,37 @@ cat .env | grep -v PASSWORD
 curl http://localhost:8080/health
 ```
 
+### Problem: Docker build error - "can't stat '/path/to/db_data'"
+
+This error occurs when Docker's legacy builder tries to check data directories during build, even though they're in `.dockerignore`.
+
+**Solution 1: Use DOCKER_BUILDKIT (recommended)**
+
+```bash
+cd ~/jobsniper-bot
+DOCKER_BUILDKIT=1 docker-compose build --no-cache app
+docker-compose up -d
+```
+
+**Solution 2: Temporarily move data directory before build**
+
+```bash
+cd ~/jobsniper-bot
+sudo mv db_data db_data_backup
+docker-compose build --no-cache app
+sudo mv db_data_backup db_data
+docker-compose up -d
+```
+
+**Solution 3: Change directory ownership**
+
+```bash
+cd ~/jobsniper-bot
+sudo chown -R ubuntu:ubuntu db_data
+docker-compose build --no-cache app
+docker-compose up -d
+```
+
 ## Quick diagnostic commands
 
 ```bash
