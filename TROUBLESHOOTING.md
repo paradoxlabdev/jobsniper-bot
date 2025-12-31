@@ -2,151 +2,151 @@
 
 ## Problem: Port already in use / Container conflict
 
-### Rozwiązanie 1: Zatrzymaj stare kontenery
+### Solution 1: Stop old containers
 
 ```bash
-# Zatrzymaj wszystkie kontenery JobSniper
+# Stop all JobSniper containers
 docker-compose down
 
-# Sprawdź czy są stare kontenery
+# Check for old containers
 docker ps -a | grep jobsniper
 
-# Usuń stare kontenery (jeśli są)
+# Remove old containers (if any)
 docker rm -f $(docker ps -a | grep jobsniper | awk '{print $1}')
 
-# Sprawdź czy porty są wolne
+# Check if ports are free
 sudo netstat -tulpn | grep -E '5433|6380|8080|9090|3001'
 ```
 
-### Rozwiązanie 2: Zmień porty w docker-compose.yml
+### Solution 2: Change ports in docker-compose.yml
 
-Jeśli port 5433 jest zajęty przez inny serwis, zmień porty:
+If port 5433 is occupied by another service, change the ports:
 
 ```yaml
-# W docker-compose.yml zmień:
+# In docker-compose.yml change:
 db:
   ports:
-    - "127.0.0.1:5434:5432"  # Zmień z 5433 na 5434
+    - "127.0.0.1:5434:5432"  # Change from 5433 to 5434
 
 redis:
   ports:
-    - "127.0.0.1:6381:6379"  # Zmień z 6380 na 6381
+    - "127.0.0.1:6381:6379"  # Change from 6380 to 6381
 ```
 
-### Rozwiązanie 3: Usuń wszystkie kontenery i sieci
+### Solution 3: Remove all containers and networks
 
 ```bash
-# Zatrzymaj wszystko
+# Stop everything
 docker-compose down
 
-# Usuń wszystkie kontenery JobSniper
+# Remove all JobSniper containers
 docker ps -a --filter "name=jobsniper" -q | xargs docker rm -f
 
-# Usuń sieć (jeśli istnieje)
+# Remove network (if exists)
 docker network ls | grep jobsniper
 docker network rm jobsniper_network 2>/dev/null || true
 
-# Sprawdź czy porty są wolne
+# Check if ports are free
 sudo lsof -i :5433
 sudo lsof -i :6380
 sudo lsof -i :8080
 sudo lsof -i :9090
 sudo lsof -i :3001
 
-# Jeśli coś zajmuje porty, zabij proces:
+# If something is using the ports, kill the process:
 sudo kill -9 <PID>
 ```
 
-### Rozwiązanie 4: Pełny reset (jeśli nic nie pomaga)
+### Solution 4: Full reset (if nothing else works)
 
 ```bash
-# 1. Zatrzymaj wszystko
+# 1. Stop everything
 docker-compose down -v
 
-# 2. Usuń wszystkie kontenery JobSniper
+# 2. Remove all JobSniper containers
 docker container prune -f --filter "name=jobsniper"
 
-# 3. Usuń sieci
+# 3. Remove networks
 docker network prune -f
 
-# 4. Sprawdź porty
+# 4. Check ports
 sudo ss -tulpn | grep -E '5433|6380|8080|9090|3001'
 
-# 5. Uruchom ponownie
+# 5. Start again
 docker-compose up -d
 ```
 
-## Inne częste problemy
+## Other common problems
 
 ### Problem: Cannot connect to database
 
 ```bash
-# Sprawdź czy baza działa
+# Check if database is running
 docker-compose ps db
 
-# Zobacz logi
+# View logs
 docker-compose logs db
 
-# Restart bazy
+# Restart database
 docker-compose restart db
 ```
 
-### Problem: Grafana nie ładuje się
+### Problem: Grafana not loading
 
 ```bash
-# Sprawdź logi
+# Check logs
 docker-compose logs grafana
 
-# Sprawdź czy port 3001 jest wolny
+# Check if port 3001 is free
 sudo lsof -i :3001
 
 # Restart Grafana
 docker-compose restart grafana
 ```
 
-### Problem: Prometheus nie zbiera metryk
+### Problem: Prometheus not collecting metrics
 
 ```bash
-# Sprawdź logi
+# Check logs
 docker-compose logs prometheus
 docker-compose logs prometheus_exporter
 
-# Sprawdź czy exporter działa
+# Check if exporter is running
 curl http://localhost:9092/metrics
 
-# Sprawdź w Prometheus UI
+# Check in Prometheus UI
 curl http://localhost:9090/api/v1/targets
 ```
 
-### Problem: Aplikacja nie startuje
+### Problem: Application not starting
 
 ```bash
-# Zobacz logi
+# View logs
 docker-compose logs -f app
 
-# Sprawdź .env
+# Check .env
 cat .env | grep -v PASSWORD
 
-# Sprawdź health
+# Check health
 curl http://localhost:8080/health
 ```
 
-## Szybkie komendy diagnostyczne
+## Quick diagnostic commands
 
 ```bash
-# Status wszystkich kontenerów
+# Status of all containers
 docker-compose ps
 
-# Logi wszystkich serwisów
+# Logs of all services
 docker-compose logs --tail=50
 
-# Restart wszystkich serwisów
+# Restart all services
 docker-compose restart
 
-# Sprawdź użycie zasobów
+# Check resource usage
 docker stats
 
-# Sprawdź wolne miejsce
+# Check free space
 df -h
 docker system df
 ```
