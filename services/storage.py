@@ -52,35 +52,36 @@ class StorageService:
         Returns:
             JobOffer instance (newly created or updated)
         """
+        # Prepare data for insert
+        insert_data = self._prepare_offer_data(offer_data)
+        
+        # Try upsert by jjit_id first (most common case)
         try:
             async with db_manager.get_session() as session:
-                # Prepare data for insert
-                insert_data = self._prepare_offer_data(offer_data)
+                stmt = insert(JobOffer).values(**insert_data)
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=["jjit_id"],
+                    set_={
+                        "title": stmt.excluded.title,
+                        "description": stmt.excluded.description,
+                        "salary_from": stmt.excluded.salary_from,
+                        "salary_to": stmt.excluded.salary_to,
+                        "skills": stmt.excluded.skills,
+                        "workplace_type": stmt.excluded.workplace_type,
+                        "updated_at": datetime.now(timezone.utc),
+                    }
+                ).returning(JobOffer)
                 
-                # Try upsert by jjit_id first (most common case)
-                try:
-                    stmt = insert(JobOffer).values(**insert_data)
-                    stmt = stmt.on_conflict_do_update(
-                        index_elements=["jjit_id"],
-                        set_={
-                            "title": stmt.excluded.title,
-                            "description": stmt.excluded.description,
-                            "salary_from": stmt.excluded.salary_from,
-                            "salary_to": stmt.excluded.salary_to,
-                            "skills": stmt.excluded.skills,
-                            "workplace_type": stmt.excluded.workplace_type,
-                            "updated_at": datetime.now(timezone.utc),
-                        }
-                    ).returning(JobOffer)
-                    
-                    result = await session.execute(stmt)
-                    offer = result.scalar_one()
-                    logger.debug(f"Upserted offer by jjit_id: {offer.jjit_id} - {offer.title}")
-                    return offer
-                    
-                except IntegrityError:
-                    # If jjit_id conflict fails, try unique identity conflict
-                    # This handles cases where same offer appears from different sources with different jjit_id
+                result = await session.execute(stmt)
+                offer = result.scalar_one()
+                logger.debug(f"Upserted offer by jjit_id: {offer.jjit_id} - {offer.title}")
+                return offer
+                
+        except IntegrityError:
+            # If jjit_id conflict fails, try unique identity conflict in a new session
+            # This handles cases where same offer appears from different sources with different jjit_id
+            try:
+                async with db_manager.get_session() as session:
                     stmt = insert(JobOffer).values(**insert_data)
                     stmt = stmt.on_conflict_do_update(
                         index_elements=["company_name", "title", "city"],  # Handle conflicts on unique identity
@@ -103,7 +104,9 @@ class StorageService:
                     offer = result.scalar_one()
                     logger.debug(f"Upserted offer by unique identity: {offer.jjit_id} - {offer.title}")
                     return offer
-                
+            except Exception as e:
+                logger.error(f"Failed to upsert offer: {e}", exc_info=True)
+                raise
         except Exception as e:
             logger.error(f"Failed to upsert offer: {e}", exc_info=True)
             raise
@@ -125,13 +128,24 @@ class StorageService:
         # Try batch first for performance
         try:
             async with db_manager.get_session() as session:
-                # Deduplicate offers by jjit_id within the batch
-                unique_offers = {}
+                # Deduplicate offers by unique identity (company_name, title, city) to prevent
+                # "ON CONFLICT DO UPDATE command cannot affect row a second time" errors
+                # PostgreSQL cannot handle multiple rows with same conflict key in one batch
+                unique_by_identity = {}
+                
                 for offer in offers_data:
                     prepared = self._prepare_offer_data(offer)
-                    unique_offers[prepared['jjit_id']] = prepared
+                    identity_key = (
+                        prepared.get('company_name', ''),
+                        prepared.get('title', ''),
+                        prepared.get('city', '')
+                    )
+                    
+                    # Keep first occurrence of each unique identity
+                    if identity_key not in unique_by_identity:
+                        unique_by_identity[identity_key] = prepared
                 
-                prepared_data = list(unique_offers.values())
+                prepared_data = list(unique_by_identity.values())
                 
                 if not prepared_data:
                     return 0
