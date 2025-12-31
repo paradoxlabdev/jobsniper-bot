@@ -1,0 +1,40 @@
+# Async HTTP Client
+aiohttp==3.9.1
+aiofiles==23.2.1
+
+# Database
+asyncpg==0.29.0
+SQLAlchemy==2.0.23
+alembic==1.13.1
+
+# Cache
+redis==5.0.1
+
+# OpenAI
+openai==1.6.1
+
+# PDF Processing
+pypdf==3.17.4
+
+# Telegram
+python-telegram-bot==20.7
+
+# Environment & Configuration
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Utilities
+tenacity==8.2.3  # Retry/backoff logic
+circuitbreaker  # Circuit breaker for API protection
+bleach==6.1.0  # HTML sanitization for user inputs
+prometheus-client==0.19.0  # Prometheus metrics exporter
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# International job boards
+httpx  # Modern async HTTP client (managed by openai mostly)
+feedparser  # RSS feed parser for WeWorkRemotely
