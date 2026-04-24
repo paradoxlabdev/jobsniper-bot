@@ -1,4 +1,4 @@
-# 🚀 Deployment Guide
+# Deployment Guide
 
 ## Wdrożenie na serwer
 
@@ -55,7 +55,7 @@ docker-compose ps
 docker-compose logs -f app
 ```
 
-## 📊 Dostęp do Grafany i Prometheusa
+## Dostęp do Grafany i Prometheusa
 
 ### Opcja 1: Bezpośredni dostęp (proste, ale mniej bezpieczne)
 
@@ -150,7 +150,7 @@ prometheus:
 - Grafana: `http://your-domain.com/grafana`
 - Prometheus: `http://your-domain.com/prometheus`
 
-## 🔒 Bezpieczeństwo
+## Bezpieczeństwo
 
 ### Zmień domyślne hasła Grafana
 
@@ -178,7 +178,7 @@ auth_basic "Restricted Access";
 auth_basic_user_file /etc/nginx/.htpasswd;
 ```
 
-## ✅ Sprawdzenie działania
+## Sprawdzenie działania
 
 ```bash
 # 1. Sprawdź czy wszystkie kontenery działają
@@ -197,7 +197,7 @@ curl http://localhost:3001/api/health
 docker-compose logs -f
 ```
 
-## 🔄 Aktualizacja
+## Aktualizacja
 
 ```bash
 # Zatrzymaj serwisy
@@ -213,14 +213,14 @@ docker-compose build
 docker-compose up -d
 ```
 
-## 📝 Uwagi
+## Uwagi
 
 - **Porty**: Grafana (3001), Prometheus (9090), App (8080) są dostępne z zewnątrz
 - **Baza danych i Redis**: Tylko localhost (bezpieczne)
 - **Dane**: Wszystkie dane są w folderach `db_data/`, `redis_data/`, `grafana_data/`, `prometheus_data/`
 - **Backup**: Regularnie kopiuj te foldery!
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ```bash
 # Sprawdź logi

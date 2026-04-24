@@ -1,4 +1,4 @@
-# 🔧 Troubleshooting Guide
+# Troubleshooting Guide
 
 ## Problem: Port already in use / Container conflict
 
@@ -180,6 +180,4 @@ docker stats
 # Check free space
 df -h
 docker system df
-``
-
-
+```

@@ -1,4 +1,4 @@
-# JobSniper 🎯
+# JobSniper
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?logo=openai&logoColor=white)
@@ -6,34 +6,32 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-4169E1?logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7+-DC382D?logo=redis&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/status-production-success.svg)
 
-**Production-ready AI-powered job monitoring system with intelligent CV matching.**
+AI-powered job-board monitor with CV matching and Telegram notifications.
 
-JobSniper scans **5 job boards** (Just Join IT, RemoteOK, Remotive, Arbeitnow, WeWorkRemotely), parses your CV, and uses **GPT-4o-mini** to score every job offer 0-100%. High matches get instant Telegram notifications with detailed justification.
+JobSniper scans five job boards (Just Join IT, RemoteOK, Remotive, Arbeitnow, WeWorkRemotely), parses your CV, and uses GPT-4o-mini to score each offer 0–100%. High-scoring matches trigger a Telegram alert with the matching justification.
 
 ![JobSniper Logo](images/logo.png)
 
-## 🔄 How It Works
+## How It Works
 
-1. **Fetch** — Scans 5 job boards every 5 minutes (configurable)
-2. **Store** — Saves all offers to PostgreSQL database
-3. **Analyze** — Uses GPT-4o-mini to compare each offer against your CV
-4. **Score** — Assigns match score (0-100%) based on skills, experience, and requirements
-5. **Notify** — Sends Telegram alert if score exceeds your threshold
+1. **Fetch** — scans five job boards every 5 minutes (configurable)
+2. **Store** — writes all offers to PostgreSQL, deduplicated by `(company_name, title, city)` and source-specific IDs
+3. **Analyze** — sends the offer + your CV to GPT-4o-mini for a structured match score and justification
+4. **Score** — returns a 0–100% match based on skills, experience, and requirements
+5. **Notify** — sends a Telegram alert if the score clears your threshold
 
-All settings can be changed dynamically via Telegram menu - no restart required!
+Settings (threshold, sources, keywords, CV) can be changed live via the Telegram menu — no restart needed.
 
-## ✨ Key Features
+## Key Features
 
-- **🧠 AI Matching** — GPT-4o-mini understands nuances in tech stacks, seniority, and domain experience
-- **📱 Telegram Control Panel** — Full UI for managing filters, CV, and triggering searches
-- **🌍 Multi-Source** — Just Join IT, RemoteOK, Remotive, Arbeitnow, WeWorkRemotely
-- **⚡ Real-time Alerts** — Instant Telegram notifications for high-match offers
-- **📊 Monitoring** — Prometheus metrics, Grafana dashboards, health checks
-- **🛡️ Resilience** — Circuit breaker for API protection, graceful error handling
+- **AI matching** — GPT-4o-mini scores each offer against the CV, with reasoning surfaced in the notification
+- **Telegram control panel** — full UI for filters, CV upload, and manual scan triggers
+- **Multi-source** — Just Join IT, RemoteOK, Remotive, Arbeitnow, WeWorkRemotely
+- **Monitoring** — Prometheus metrics, Grafana dashboard, health-check endpoints
+- **Resilience** — circuit breaker around the OpenAI API, exponential backoff with jitter on fetch retries
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 | Category | Technology |
 |----------|------------|
@@ -45,7 +43,7 @@ All settings can be changed dynamically via Telegram menu - no restart required!
 | **Monitoring** | Prometheus + Grafana |
 | **Deployment** | Docker Compose |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -120,7 +118,7 @@ docker ps | grep <port>
 # Stop conflicting container or change port in docker-compose.yml
 ```
 
-## 🎮 Telegram Control Panel
+## Telegram Control Panel
 
 Type `/start` in Telegram to access the interactive control panel.
 
@@ -177,7 +175,7 @@ Type `/start` in Telegram to access the interactive control panel.
   </table>
 </div>
 
-## 📊 Monitoring
+## Monitoring
 
 ### Health Checks
 
@@ -196,7 +194,7 @@ Type `/start` in Telegram to access the interactive control panel.
   <p><em>Real-time monitoring with health metrics, response times, and circuit breaker status</em></p>
 </div>
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -209,15 +207,15 @@ Type `/start` in Telegram to access the interactive control panel.
 | `MATCH_THRESHOLD` | Minimum score for notification | 80 |
 | `OPENAI_MODEL` | OpenAI model | gpt-4o-mini |
 
-## 🔒 Security Features
+## Security Features
 
 - Non-root Docker user
-- Resource limits for all containers
-- Network isolation (DB/Redis only accessible from Docker network)
-- Health checks with automatic container recovery
-- Circuit breaker for API protection
+- Resource limits on all containers
+- Network isolation — DB and Redis only reachable from the Docker network
+- Container-level health checks with automatic recovery
+- Circuit breaker around outbound OpenAI calls
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 JobSniper/
@@ -231,24 +229,25 @@ JobSniper/
 └── main.py            # Main orchestrator
 ```
 
-## 🧪 Production Features
+## Operational Notes
 
-- ✅ Deep health checks (DB, Redis, CV, circuit breaker)
-- ✅ Prometheus metrics & Grafana dashboards
-- ✅ Circuit breaker for resilient API calls
-- ✅ Docker hardening (resource limits, security, logging)
-- ✅ Graceful degradation
-- ✅ Exponential backoff with jitter
+- Deep health checks cover DB, Redis, CV presence, and circuit-breaker state
+- Prometheus metrics scraped by the bundled exporter, visualised via the Grafana dashboard JSON included in this repo
+- The OpenAI circuit breaker trips after repeated failures and falls back to queue-only mode until it half-opens
+- Docker containers run non-root with resource limits and `TimedRotatingFileHandler` log rotation
+- Fetch retries use exponential backoff with jitter to avoid thundering-herd reconnects on upstream outages
 
-## 📝 License
+## Known Limitations
+
+- **Single instance only.** The scan loop assumes one process per database — running two in parallel would race on `mark_as_notified_if_not_sent`. Horizontal scaling would need a distributed lock or a per-worker shard.
+- **AI cost scales linearly with offer volume.** No cheap-path pre-filter before the LLM call — every new offer hits the API at least once. Budget accordingly, or set `MATCH_THRESHOLD` high enough that the follow-up cost (notification render, justification) doesn't compound.
+- **CV parsing is single-file and single-language.** Non-English CVs still work because GPT-4o-mini is multilingual, but structured extraction is weaker on non-tech-standard layouts.
+- **Telegram as the only notification channel.** Slack / email / webhook targets are not built in; the hook is in `services/notification.py` if you want to add one.
+
+## License
 
 MIT
 
-## 👤 Author
-
-**paradoxlab.dev**
-
 ---
 
-**Version:** 2.0.0  
-**Last Updated:** 2025
+*Last updated: 2026*
